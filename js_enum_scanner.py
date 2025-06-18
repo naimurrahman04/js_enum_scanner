@@ -98,7 +98,8 @@ def fuzz_parameters(endpoint, common_params):
             url = f"{endpoint}{sep}{param}=test"
             resp = requests.get(url, headers=HEADERS, timeout=5)
             if resp.status_code in [200, 403, 500]:
-                print(f"  └─[DISCOVERED] {param} => Status {resp.status_code}")
+                size = len(resp.content)
+                print(f"  └─[DISCOVERED] {param} => Status {resp.status_code}, Size {size} bytes")
                 discovered.add(param)
         except requests.RequestException:
             continue
