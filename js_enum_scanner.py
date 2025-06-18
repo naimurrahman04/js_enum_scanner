@@ -71,21 +71,26 @@ def should_ignore_js(file):
 
 
 def fetch_js_and_extract(js_url, base_url, token_patterns):
+    print(f"[JS] Fetching: {js_url}")
     try:
         resp = requests.get(js_url, headers=HEADERS, timeout=10)
         if resp.status_code != 200:
+            print(f"  └─[WARN] Status: {resp.status_code}")
             return set(), set(), set(), False
         text = resp.text
         endpoints = extract_links(text, base_url)
         params = extract_parameters(text)
         tokens = extract_tokens(text, token_patterns)
         is_graphql = bool(GRAPHQL_REGEX.search(text))
+        print(f"  └─[INFO] Found {len(endpoints)} endpoints, {len(params)} params, {len(tokens)} tokens")
         return endpoints, params, tokens, is_graphql
-    except requests.RequestException:
+    except requests.RequestException as e:
+        print(f"  └─[FAIL] {e}")
         return set(), set(), set(), False
 
 
 def fuzz_parameters(endpoint, common_params):
+    print(f"[FZ] Fuzzing: {endpoint}")
     discovered = set()
     for param in common_params:
         try:
@@ -93,6 +98,7 @@ def fuzz_parameters(endpoint, common_params):
             url = f"{endpoint}{sep}{param}=test"
             resp = requests.get(url, headers=HEADERS, timeout=5)
             if resp.status_code in [200, 403, 500]:
+                print(f"  └─[DISCOVERED] {param} => Status {resp.status_code}")
                 discovered.add(param)
         except requests.RequestException:
             continue
@@ -116,6 +122,7 @@ def scan_target(url, custom_tokens, custom_params, max_threads):
         return
 
     js_links = get_js_links(html)
+    print(f"[INFO] Found {len(js_links)} external JS files")
     tasks = []
     with concurrent.futures.ThreadPoolExecutor(max_threads) as executor:
         for js in js_links:
@@ -131,6 +138,7 @@ def scan_target(url, custom_tokens, custom_params, max_threads):
             tokens.update(t)
             graphql_found = graphql_found or gq
 
+    print("[INFO] Scanning inline scripts...")
     for block in extract_inline_js(html):
         endpoints.update(extract_links(block, base))
         params.update(extract_parameters(block))
@@ -138,6 +146,7 @@ def scan_target(url, custom_tokens, custom_params, max_threads):
         if GRAPHQL_REGEX.search(block):
             graphql_found = True
 
+    print("[INFO] Fuzzing discovered endpoints...")
     for ep in endpoints:
         params.update(fuzz_parameters(ep, param_list))
 
