@@ -23,9 +23,9 @@ COMMON_PARAM_NAMES = ["id", "user", "name", "token", "auth", "search", "q", "lan
 IGNORED_EXTENSIONS = ("jquery", "bootstrap", "analytics", "google")
 
 ENDPOINT_REGEX = re.compile(r'(["\'])(/[^"\']+?|https?://[^"\']+?|\.{1,2}/[^"\']+?|\w+\.(php|json|jsp|cgi|action|aspx))\1')
-FETCH_REGEX = re.compile(r'fetch\(("|'|'|`)(.+?)(\1)')
-AXIOS_REGEX = re.compile(r'axios\.(get|post|put|delete)\(("|'|'|`)(.+?)(\2)')
-XHR_REGEX = re.compile(r'open\(("|'|'|`)(GET|POST|PUT|DELETE)(\1),\s*("|'|'|`)(.+?)(\4)')
+FETCH_REGEX = re.compile(r'fetch\(("|\'|`)(.+?)(\1)')
+AXIOS_REGEX = re.compile(r'axios\.(get|post|put|delete)\(("|\'|`)(.+?)(\2)')
+XHR_REGEX = re.compile(r'open\(("|\'|`)(GET|POST|PUT|DELETE)(\1),\s*("|\'|`)(.+?)(\4)')
 GRAPHQL_REGEX = re.compile(r'graphql|ApolloClient', re.IGNORECASE)
 PARAM_REGEX = re.compile(r'[\?&]([a-zA-Z0-9_\-]+)=?')
 
